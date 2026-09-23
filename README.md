@@ -65,19 +65,24 @@ By default the site is fully open to anyone with the link. If you want to
 lock it down before you send the link to the client — e.g. so no one stumbles
 on it early — set a single shared password:
 
-1. Add a line to your local `.env`:
+1. Add lines to your local `.env`:
    ```
    SITE_PASSWORD="something-you-choose"
+   SITE_USER="admin"
    ```
-2. In Vercel, add the same `SITE_PASSWORD` environment variable (Project
-   Settings → Environment Variables, for Production/Preview/Development —
-   same as `DATABASE_URL`).
+   `SITE_USER` is optional — if you leave it out, the login screen's ID
+   field is accepted as-is (any non-empty value) and only the password is
+   actually checked. Set it if you want the ID itself to matter.
+2. In Vercel, add the same `SITE_PASSWORD` (and `SITE_USER`, if you set one)
+   environment variables (Project Settings → Environment Variables, for
+   Production/Preview/Development — same as `DATABASE_URL`).
 3. Redeploy (or restart `npm run dev` locally).
 
-With `SITE_PASSWORD` set, every page redirects to a simple `/login` screen
-until the correct password is entered; it's then remembered in the browser
-for 30 days via a cookie. If `SITE_PASSWORD` is left unset (locally or on
-Vercel), the site behaves exactly as before — no login, nothing changes.
+With `SITE_PASSWORD` set, every page redirects to a `/login` screen with an
+ID and password field until the correct credentials are entered; it's then
+remembered in the browser for 30 days via a cookie. If `SITE_PASSWORD` is
+left unset (locally or on Vercel), the site behaves exactly as before — no
+login, nothing changes.
 
 This is a basic shared-password gate meant to keep a demo link private
 before a scheduled walkthrough — not real authentication (no per-user
