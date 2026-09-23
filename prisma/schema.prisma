@@ -1,0 +1,60 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Employee {
+  id              String   @id @default(cuid())
+  name            String
+  department      String
+  badgeCode       String   @unique
+  registeredPlate String?  @unique
+  createdAt       DateTime @default(now())
+
+  vehicleLogs    VehicleLog[]
+  accessLogs     AccessLog[]
+  visitorsHosted Visitor[]
+}
+
+model Visitor {
+  id             String    @id @default(cuid())
+  name           String
+  company        String?
+  purpose        String
+  hostEmployeeId String?
+  hostEmployee   Employee? @relation(fields: [hostEmployeeId], references: [id])
+  vehiclePlate   String?
+  idPhotoUrl     String?
+  passCode       String    @unique
+  checkedInAt    DateTime  @default(now())
+  checkedOutAt   DateTime?
+
+  vehicleLogs VehicleLog[]
+}
+
+model VehicleLog {
+  id         String    @id @default(cuid())
+  plate      String
+  type       String // "employee" | "visitor" | "unknown"
+  direction  String // "in" | "out"
+  photoUrl   String?
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  visitorId  String?
+  visitor    Visitor?  @relation(fields: [visitorId], references: [id])
+  timestamp  DateTime  @default(now())
+}
+
+model AccessLog {
+  id         String   @id @default(cuid())
+  personType String // "employee"
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  direction  String // "in" | "out"
+  method     String // "badge"
+  timestamp  DateTime @default(now())
+}
