@@ -59,6 +59,31 @@ Then open **http://localhost:3000**. Camera access works on `localhost` without 
 (`npm run db:push` and `npm run db:seed` still exist if you ever want to run either step
 on its own.)
 
+## Password-protecting the demo (optional)
+
+By default the site is fully open to anyone with the link. If you want to
+lock it down before you send the link to the client — e.g. so no one stumbles
+on it early — set a single shared password:
+
+1. Add a line to your local `.env`:
+   ```
+   SITE_PASSWORD="something-you-choose"
+   ```
+2. In Vercel, add the same `SITE_PASSWORD` environment variable (Project
+   Settings → Environment Variables, for Production/Preview/Development —
+   same as `DATABASE_URL`).
+3. Redeploy (or restart `npm run dev` locally).
+
+With `SITE_PASSWORD` set, every page redirects to a simple `/login` screen
+until the correct password is entered; it's then remembered in the browser
+for 30 days via a cookie. If `SITE_PASSWORD` is left unset (locally or on
+Vercel), the site behaves exactly as before — no login, nothing changes.
+
+This is a basic shared-password gate meant to keep a demo link private
+before a scheduled walkthrough — not real authentication (no per-user
+accounts, no roles). That's intentionally out of scope for a demo; see
+"Limitations" below.
+
 ## Deploying to Vercel
 
 1. Push this project to a GitHub repo (Vercel deploys from git).
