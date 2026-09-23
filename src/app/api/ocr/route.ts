@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { recognizePlate } from "@/lib/ocr";
 
 export const runtime = "nodejs";
+// OCR can take a few seconds, especially on a cold start. Raise the function
+// time budget where the hosting plan allows it (ignored on Vercel Hobby,
+// which caps every function at 10s regardless of this value).
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {

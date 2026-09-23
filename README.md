@@ -32,16 +32,50 @@ This is a **proof of concept for a client walkthrough**, not a production system
 - Internet access the first time you run it, so the OCR engine (Tesseract) can download
   its language data. After that first run it's cached locally.
 
-## Setup
+## Database
+
+This project uses **Postgres** (a free [Neon](https://neon.tech) database), set via
+`DATABASE_URL` in `.env`. Using a real hosted database — instead of a local SQLite file —
+means the exact same setup works whether you're running locally or deployed on Vercel;
+there's one database either way, not two separate setups to keep in sync.
+
+## Setup (local)
 
 ```bash
 npm install
-npx prisma db push      # creates the local SQLite database (dev.db) from the schema
+npx prisma db push      # creates the tables in your Postgres database from the schema
 npm run db:seed         # adds 6 demo employees with badges and registered vehicles
 npm run dev
 ```
 
 Then open **http://localhost:3000**. Camera access works on `localhost` without HTTPS.
+
+## Deploying to Vercel
+
+1. Push this project to a GitHub repo (Vercel deploys from git).
+2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import that repo. Vercel
+   auto-detects Next.js, no config needed.
+3. Before the first deploy, add an environment variable in the Vercel project settings:
+   - Name: `DATABASE_URL`
+   - Value: the same Postgres connection string from your local `.env`
+   (Project Settings → Environment Variables — add it for Production, Preview, and
+   Development so it works on every deploy.)
+4. Deploy. Vercel runs `npm install` (which also runs `prisma generate` via the
+   `postinstall` script) and `next build` automatically.
+5. The database schema only needs to be pushed once (from your machine, against the same
+   `DATABASE_URL`) — `npx prisma db push` already did that in the setup step above, so
+   there's nothing extra to run on Vercel's side for the schema itself.
+6. Open the `*.vercel.app` URL Vercel gives you — that's your shareable link.
+
+**Camera/mic note:** browsers only allow camera access on `https://` or `localhost`.
+Vercel deployments are `https://` by default, so the Gate/Sign-In/Check-In/Check-Out
+camera flows work the same as they do locally — no extra setup needed there.
+
+**A known limitation on Vercel's free (Hobby) tier:** serverless functions are capped at
+10 seconds each. The OCR step (`/api/ocr`) can occasionally take longer than that on a
+cold start, in which case that one request would time out — the operator can just retry,
+or type the plate in manually instead. This isn't an issue on Vercel Pro (60s limit) or
+when running locally.
 
 ## Suggested demo script
 
@@ -62,8 +96,6 @@ Then open **http://localhost:3000**. Camera access works on `localhost` without 
 
 ## Limitations (by design, for a demo)
 
-- Runs entirely on your machine with a local SQLite file (`dev.db`) — no cloud hosting,
-  no external database, nothing shared with anyone unless you show it to them directly.
 - No real ANPR camera or RFID/card reader hardware — a webcam/photo stands in for the
   fixed gate camera, and a QR code stands in for a physical badge.
 - OCR accuracy depends on photo quality; a production system would use a purpose-built
