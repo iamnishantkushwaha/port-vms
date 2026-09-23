@@ -39,16 +39,25 @@ This project uses **Postgres** (a free [Neon](https://neon.tech) database), set 
 means the exact same setup works whether you're running locally or deployed on Vercel;
 there's one database either way, not two separate setups to keep in sync.
 
+**The schema and demo data sync automatically on every build** — the `build` script runs
+`prisma generate`, then `prisma db push` (creates/updates tables to match
+`prisma/schema.prisma`), then re-seeds the 6 demo employees (safe to repeat — it
+upserts by badge code, so it never creates duplicates), before finally running
+`next build`. This means every deploy — on Vercel or run locally — always ends up with
+the database schema and demo data in sync, without a separate manual step.
+
 ## Setup (local)
 
 ```bash
 npm install
-npx prisma db push      # creates the tables in your Postgres database from the schema
-npm run db:seed         # adds 6 demo employees with badges and registered vehicles
+npm run build   # syncs the database schema + demo data, then builds the app once
 npm run dev
 ```
 
 Then open **http://localhost:3000**. Camera access works on `localhost` without HTTPS.
+
+(`npm run db:push` and `npm run db:seed` still exist if you ever want to run either step
+on its own.)
 
 ## Deploying to Vercel
 
@@ -60,12 +69,14 @@ Then open **http://localhost:3000**. Camera access works on `localhost` without 
    - Value: the same Postgres connection string from your local `.env`
    (Project Settings → Environment Variables — add it for Production, Preview, and
    Development so it works on every deploy.)
-4. Deploy. Vercel runs `npm install` (which also runs `prisma generate` via the
-   `postinstall` script) and `next build` automatically.
-5. The database schema only needs to be pushed once (from your machine, against the same
-   `DATABASE_URL`) — `npx prisma db push` already did that in the setup step above, so
-   there's nothing extra to run on Vercel's side for the schema itself.
-6. Open the `*.vercel.app` URL Vercel gives you — that's your shareable link.
+4. Deploy. Vercel's build runs `npm install` → `npm run build`, and because the `build`
+   script itself now pushes the schema and re-seeds the data (see "Database" above),
+   the tables get created in whatever database `DATABASE_URL` points to automatically —
+   nothing needs to be run manually against the production database.
+5. Open the `*.vercel.app` URL Vercel gives you — that's your shareable link.
+
+If you ever change `prisma/schema.prisma`, you don't need to remember to run anything by
+hand — just push the code; the next deploy's build step applies the new schema.
 
 **Camera/mic note:** browsers only allow camera access on `https://` or `localhost`.
 Vercel deployments are `https://` by default, so the Gate/Sign-In/Check-In/Check-Out
