@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconAnchor } from "@/components/icons";
 import { navSections } from "@/lib/nav";
+import LogoutButton from "@/components/LogoutButton";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -50,6 +51,9 @@ export default function Sidebar() {
         ))}
       </nav>
 
+      <div className="border-t border-white/10 px-3 py-3">
+        <LogoutButton />
+      </div>
       <div className="border-t border-white/10 px-5 py-4">
         <p className="text-xs text-slate-500">Single-gate demo build</p>
         <p className="text-xs text-slate-600">v0.1 — local data only</p>

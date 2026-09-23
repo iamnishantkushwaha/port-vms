@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navSections } from "@/lib/nav";
 import { IconAnchor } from "@/components/icons";
+import LogoutButton from "@/components/LogoutButton";
 
 function IconMenu({ className = "h-5 w-5" }: { className?: string }) {
   return (
@@ -86,6 +87,9 @@ function DrawerContent({ onClose, pathname }: { onClose: () => void; pathname: s
           ))}
         </nav>
 
+        <div className="border-t border-white/10 px-3 py-3">
+          <LogoutButton />
+        </div>
         <div className="border-t border-white/10 px-5 py-4">
           <p className="text-xs text-slate-500">Single-gate demo build</p>
         </div>
